@@ -23,7 +23,7 @@ img{
   
 body{
     background: var(--sunnyskybg);
-    min-height: 100vmax;
+    min-height: 100vh;
     
    
 }
