@@ -45,6 +45,7 @@ const day2ForecastIcon = document.querySelector(".day-2-icon");
 
 
 
+
 //on window load, we get Geolocation which goes into api and gets local weather data
 getCurrentLocationWeather =  () =>{
 
@@ -189,7 +190,6 @@ getCurrentLocationWeather =  () =>{
         };
         
         navigator.geolocation.getCurrentPosition(success, error);
-
 
     });
 
@@ -351,9 +351,175 @@ getWeatherSearch = () =>{
         }
         else{
             searchWeatherData()
+            search.value = '';
         }
 
     });
+
+
+    search.addEventListener("keyup" , e =>{
+        if(e.key == "Enter"){
+            
+            search.input = '';
+
+             //getting the weather data from search query
+            searchWeatherData = async() =>{
+            const searchForecastRes = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=${APIKEY}&q=${search.value}&days=3&aqi=no`);
+            const searchForecastData = await searchForecastRes.json();
+            console.log(searchForecastRes.status)
+            if(searchForecastRes.status == 400){
+                searchErrorMessage.classList.add("unhide");
+                console.log("caught error")
+                searchContaineraddShake()
+                setTimeout(searchContainerRemoveShake, 1500)
+                setTimeout(()=>{
+                    searchErrorMessage.classList.remove("unhide")
+                }, 3500)
+            
+                return
+            }
+
+             //Capitalizes words in weather description string
+             weatherDescription = searchForecastData.current.condition.text;
+             words = weatherDescription.split(" ");
+             for(i = 0; i < words.length; i++){
+             words[i] = words[i][0].toUpperCase() + words[i].substr(1);
+             }
+
+            // get forecast days
+
+            const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+            const tomorrowSplitDate = searchForecastData.forecast.forecastday[1].date.split("-");
+            const nextDaySplitDate = searchForecastData.forecast.forecastday[2].date.split("-");
+
+            const tomorrowDate = tomorrowSplitDate.join(", ");
+            const nextDayDate = nextDaySplitDate.join(", ");
+
+            let tomorrow = (new Date(tomorrowDate).getDay());
+            let nextDay = (new Date(nextDayDate).getDay());
+            console.log(weekday[tomorrow])
+
+            //pull api data onto page
+            secOneLocation.innerText = `${searchForecastData.location.name}, ${searchForecastData.location.region}`;
+            secOneMainTemp.innerText = `${Math.floor(searchForecastData.current.temp_f)}°`;
+            secOneDescription.innerText = `${words.join(" ")}`
+            secOneHighTemp.innerText = `Day ${Math.round(searchForecastData.forecast.forecastday[0].day.maxtemp_f)}°`;
+            secOneLowTemp.innerText = `Night ${Math.round(searchForecastData.forecast.forecastday[0].day.mintemp_f)}°`;
+            secOneFeelsLike.innerText= `${Math.round(searchForecastData.current.feelslike_f)}°`
+            secOneHighLow.innerText = `${Math.round(searchForecastData.forecast.forecastday[0].day.maxtemp_f)}° / ${Math.round(searchForecastData.forecast.forecastday[0].day.mintemp_f)}°`
+            secOneHumidity.innerText = `${searchForecastData.current.humidity} %`
+            secOneChanceOfRain.innerText = `${searchForecastData.forecast.forecastday[0].day.daily_chance_of_rain} %`;
+            secOnePressure.innerText = searchForecastData.current.pressure_in;
+            secOneUVIndex.innerText = `${searchForecastData.current.uv} of 11`;
+            secOneWind.innerText = `${searchForecastData.current.wind_mph} mph`;
+            secOneweatherToday.innerText = `Weather in ${searchForecastData.location.name}`;
+            todayForecastTitle.innerText = 'Today';
+            day1ForecastTitle.innerText = weekday[tomorrow];
+            day2ForecastTitle.innerText = weekday[nextDay];
+            todayForecastTemp.innerText = `${Math.round(searchForecastData.forecast.forecastday[0].day.maxtemp_f)}°`
+            day1ForecastTemp.innerText = `${Math.round(searchForecastData.forecast.forecastday[1].day.maxtemp_f)}°`
+            day2ForecastTemp.innerText = `${Math.round(searchForecastData.forecast.forecastday[2].day.maxtemp_f)}°`
+            todayForecastLowTemp.innerText = `${Math.round(searchForecastData.forecast.forecastday[0].day.mintemp_f)}°`
+            day1ForecastLowTemp.innerText = `${Math.round(searchForecastData.forecast.forecastday[1].day.mintemp_f)}°`
+            day2ForecastLowTemp.innerText = `${Math.round(searchForecastData.forecast.forecastday[2].day.mintemp_f)}°`
+
+
+             //change icons based on weather description
+             if(searchForecastData.current.condition.code <= 1000){
+                secOneWeatherIcon.src = 'images/sun.png'
+            }
+            else if(searchForecastData.current.condition.code <= 1009){
+                secOneWeatherIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.current.condition.code >= 1149){
+                secOneWeatherIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.current.condition.code >= 1198){
+                secOneWeatherIcon.src = 'images/snow.png'
+            }
+            else if(searchForecastData.current.condition.code >=1240 && searchForecastData.current.condition.code <=1246   ){
+                secOneWeatherIcon.src = 'images/heavy-rain.png'
+            }
+            else if(searchForecastData.current.condition.code >=1273  ){
+                secOneWeatherIcon.src = 'images/storm.png'
+            }
+            //change icon for today forecast
+            if(searchForecastData.forecast.forecastday[0].day.condition.code <= 1000){
+                todayForecastIcon.src = 'images/sun.png'
+            }
+            else if(searchForecastData.forecast.forecastday[0].day.condition.code <= 1009){
+                todayForecastIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.forecast.forecastday[0].day.condition.code >= 1149){
+                todayForecastIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.forecast.forecastday[0].day.condition.code >= 1198){
+                todayForecastIcon.src =  'images/snow.png'
+            }
+            else if(searchForecastData.forecast.forecastday[0].day.condition.code >= 1240 && searchForecastData.forecast.forecastday[0].day.condition.code <=1246){
+                todayForecastIcon.src =  'images/heavy-rain.png'
+            }
+            else if(searchForecastData.forecast.forecastday[0].day.condition.code >= 1273){
+                todayForecastIcon.src =  'images/storm.png'
+            }
+            // changes icoc for day1 forecast
+            if(searchForecastData.forecast.forecastday[1].day.condition.code <= 1000){
+                day1ForecastIcon.src = 'images/sun.png'
+            }
+            else if(searchForecastData.forecast.forecastday[1].day.condition.code <= 1009){
+                day1ForecastIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.forecast.forecastday[1].day.condition.code >= 1149){
+                day1ForecastIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.forecast.forecastday[1].day.condition.code >= 1198){
+                day1ForecastIcon.src =  'images/snow.png'
+            }
+            else if(searchForecastData.forecast.forecastday[1].day.condition.code >= 1240 && searchForecastData.forecast.forecastday[1].day.condition.code <=1246){
+                day1ForecastIcon.src =  'images/heavy-rain.png'
+            }
+            else if(searchForecastData.forecast.forecastday[1].day.condition.code >= 1273){
+                day1ForecastIcon.src =  'images/storm.png'
+            }
+            // changesicon for day2 forecast
+            if(searchForecastData.forecast.forecastday[2].day.condition.code <= 1000){
+                day2ForecastIcon.src = 'images/sun.png'
+            }
+            else if(searchForecastData.forecast.forecastday[2].day.condition.code <= 1009){
+                day2ForecastIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.forecast.forecastday[2].day.condition.code >= 1149){
+                day2ForecastIcon.src = 'images/partlycloudy.png'
+            }
+            else if(searchForecastData.forecast.forecastday[2].day.condition.code >= 1198){
+                day2ForecastIcon.src =  'images/snow.png'
+            }
+            else if(searchForecastData.forecast.forecastday[2].day.condition.code >= 1240 && searchForecastData.forecast.forecastday[2].day.condition.code <=1246){
+                day2ForecastIcon.src =  'images/heavy-rain.png'
+            }
+            else if(searchForecastData.forecast.forecastday[2].day.condition.code >= 1273){
+                day2ForecastIcon.src =  'images/storm.png'
+            }
+            
+
+
+        }
+    
+        if(search.value == ""){
+            searchContaineraddShake()
+            setTimeout(searchContainerRemoveShake, 1500)
+            return
+        }
+        else{
+            searchWeatherData()
+            search.value = '';
+        }
+           
+        }
+    })
+
+    
 }
 getWeatherSearch()
 
@@ -525,4 +691,5 @@ createLocalStorage = () =>{
 };
 
 // createLocalStorage()
+
 
