@@ -55,7 +55,7 @@ getCurrentLocationWeather =  () =>{
             let currentLon = position.coords.longitude;
             
             currentLocationWeatherData = async() =>{
-                const currentForcastRes = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${APIKEY}&q=${currentLat},${currentLon}&days=3&aqi=no`);
+                const currentForcastRes = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=${APIKEY}&q=${currentLat},${currentLon}&days=3&aqi=no`);
                 const currentForecastData = await currentForcastRes.json();
                 console.log(currentForecastData);
 
@@ -202,7 +202,7 @@ getWeatherSearch = () =>{
 
         //getting the weather data from search query
         searchWeatherData = async() =>{
-            const searchForecastRes = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${APIKEY}&q=${search.value}&days=3&aqi=no`);
+            const searchForecastRes = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=${APIKEY}&q=${search.value}&days=3&aqi=no`);
             const searchForecastData = await searchForecastRes.json();
             console.log(searchForecastRes.status)
             if(searchForecastRes.status == 400){
@@ -439,7 +439,7 @@ createLocalStorage = () =>{
         
 
         searchBtn.addEventListener("click", async ()=>{
-            const searchForecastRecentRes = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${APIKEY}&q=${search.value}&days=3&aqi=no`);
+            const searchForecastRecentRes = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=${APIKEY}&q=${search.value}&days=3&aqi=no`);
             const searchForecastRecentData = await searchForecastRecentRes.json();
             console.log(searchForecastRecentData)
 
